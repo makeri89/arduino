@@ -95,13 +95,16 @@ void loop() {
       // game speed acceleration slows down towards the end
       if (gameSpeed >= 25){
         if (gameSpeed < 70) {
-          gameAcc = 6;
+          gameAcc = 7;
         }
         if (gameSpeed < 60) {
           gameAcc = 4;
         }
         if (gameSpeed < 50) {
           gameAcc = 1;
+        }
+        if (gameSpeed < 40 & result % 3 != 0) {
+          gameAcc = 0;
         }
         gameSpeed = gameSpeed - gameAcc;
       }
@@ -146,7 +149,7 @@ void printer(int printStartLoc, String firstRow, String secondRowStr, int second
       printStartLoc--;
     }
     delay(2000);
-    pressed()
+    pressed();
   } else {
     lcd.clear();
   }
