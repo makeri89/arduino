@@ -1,5 +1,6 @@
 #include <LiquidCrystal.h>
 #include <ezButton.h>
+#include <EEPROM.h>
 
 #define rs 4
 #define en 6
@@ -33,16 +34,21 @@ int cursorLocY = 0,
     row = 0,
     meteorOnField = 0,
     randNumber = 0,
-    gameOver = 0,
+    gameOver = 1,
     result = 0,
     gameSpeed = 100,
-    gameAcc = 5;
+    gameAcc = 5,
+    memoryAddr = 0;
+
+byte value;
 
 void setup() {
   lcd.createChar(0, meteor);
   lcd.begin(16, 2);
   lcd.setCursor(cursorLocX, cursorLocY);
   lcd.print(">");
+  value = EEPROM.read(memoryAddr);
+  lcd.print(value);
 }
 
 void loop() {
@@ -120,6 +126,10 @@ void loop() {
       }
       meteorLoc = 15;
       gameOver = 1;
+      value = EEPROM.read(memoryAddr);
+      if (result > value) {
+        EEPROM.write(memoryAddr, result);
+      }
       result = 0;
       gameSpeed = 100;
     }
