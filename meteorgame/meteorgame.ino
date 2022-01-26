@@ -21,7 +21,7 @@ byte meteor[8] = {
   B00000,
   B00100,
   B01010,
-  B10001,
+  B10101,
   B01010,
   B00100,
   B00000,
@@ -34,30 +34,24 @@ int cursorLocY = 0,
     row = 0,
     meteorOnField = 0,
     randNumber = 0,
-    gameOver = 1,
+    gameOver = 0,
     result = 0,
     gameSpeed = 100,
     gameAcc = 5,
     memoryAddr = 0;
 
-byte value;
+byte memoryValue;
 
 void setup() {
   lcd.createChar(0, meteor);
   lcd.begin(16, 2);
   lcd.setCursor(cursorLocX, cursorLocY);
   lcd.print(">");
-  value = EEPROM.read(memoryAddr);
-  lcd.print(value);
-}
+  memoryValue = EEPROM.read(memoryAddr);
+  }
 
 void loop() {
-  button.loop();
   // start new game
-  if (button.isPressed() & gameOver == 1) {
-    gameOver = 0;
-    lcd.clear();
-  }
   if (gameOver == 0) {
     int xValue = analogRead(A0);
     int yValue = analogRead(A1);
@@ -98,40 +92,76 @@ void loop() {
       lcd.setCursor(1,1);
       lcd.print(" ");
       result++;
-      if (gameSpeed >= 30){
+      // game speed acceleration slows down towards the end
+      if (gameSpeed >= 25){
         if (gameSpeed < 70) {
+          gameAcc = 6;
+        }
+        if (gameSpeed < 60) {
           gameAcc = 4;
         }
         if (gameSpeed < 50) {
-          gameAcc = 3;
+          gameAcc = 1;
         }
-        if (gameSpeed < 40) {
-          gameAcc = 2;
-        }
-        gameSpeed = gameSpeed - gameAcc;         
+        gameSpeed = gameSpeed - gameAcc;
       }
     }
 
     if (meteorLoc == cursorLocX & row == cursorLocY) {
-      int printStartLoc = 15;
-      for (int i = 0; i < 12; i++) {
-        lcd.clear();
-        lcd.setCursor(printStartLoc, 0);
-        lcd.print("GAME OVER");
-        lcd.setCursor(printStartLoc, 1);
-        lcd.print("SCORE: ");
-        lcd.print(result);
-        delay(100);
-        printStartLoc--;
-      }
-      meteorLoc = 15;
       gameOver = 1;
-      value = EEPROM.read(memoryAddr);
-      if (result > value) {
+      if (result > memoryValue) {
         EEPROM.write(memoryAddr, result);
+        memoryValue = EEPROM.read(memoryAddr);
       }
-      result = 0;
-      gameSpeed = 100;
     }
+  } else {
+    // scores are printed if a game is not going
+
+    int printStartLoc = 15;
+
+    printer(printStartLoc, "GAME OVER", "SCORE: ", -1, result);
+    printer(printStartLoc, "HIGHSCORE", "", memoryValue, -1);
+    printer(printStartLoc, "HOLD TO", "RESTART", -1, -1);
+  }
+}
+
+void printer(int printStartLoc, String firstRow, String secondRowStr, int secondRowInt, int score) {
+  if (gameOver == 1) {
+    for (int i = 0; i < 12; i++) {
+      pressed();
+      lcd.clear();
+      lcd.setCursor(printStartLoc, 0);
+      lcd.print(firstRow);
+      lcd.setCursor(printStartLoc, 1);
+      if (secondRowInt == -1) {
+        lcd.print(secondRowStr);
+      } else {
+        lcd.setCursor(printStartLoc + 3, 1);
+        lcd.print(secondRowInt);
+      }
+      if (score != -1) {
+        lcd.print(score);
+      }
+      delay(50);
+      printStartLoc--;
+    }
+    delay(2000);
+    pressed()
+  } else {
+    lcd.clear();
+  }
+}
+
+bool pressed() {
+  button.loop();
+  if (button.isPressed() & gameOver == 1) {
+    result = 0;
+    gameSpeed = 100;    
+    meteorLoc = 15;
+    gameOver = 0;
+    lcd.clear();
+    return true;
+  } else {
+    return false;
   }
 }
