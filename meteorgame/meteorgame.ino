@@ -27,6 +27,8 @@ byte meteor[8] = {
   B00000,
 };
 
+const int buttonPin = 7;
+
 int cursorLocY = 0,
     cursorLocX = 3,
     meteorTimer = 0,
@@ -42,7 +44,8 @@ int cursorLocY = 0,
     nameAddr = 2,
     nameField = 5,
     letterLocX = 0,
-    nameGivenThisRound = 0; 
+    nameGivenThisRound = 0,
+    buttonState = 0; 
 
 byte memoryValue;
 String playerName = "";
@@ -51,6 +54,7 @@ char letters[27] = {"ABCDEFGHIJKLMNOPQRSTUWVXYZ >"};
 
 void setup() {
   lcd.createChar(0, meteor);
+  pinMode(buttonPin, INPUT);
   lcd.begin(16, 2);
   lcd.setCursor(cursorLocX, cursorLocY);
   lcd.print(">");
@@ -60,6 +64,11 @@ void setup() {
 void loop() {
   // start new game
   if (gameOver == 0) {
+    buttonState = digitalRead(buttonPin);
+    if (buttonState == HIGH) {
+      EEPROM.write(memoryAddr, 0);
+      EEPROM.write(nameAddr, " ");
+    }
     nameField = 5;
     int xValue = analogRead(A0);
     int yValue = analogRead(A1);
