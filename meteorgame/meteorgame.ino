@@ -60,6 +60,7 @@ void setup() {
 void loop() {
   // start new game
   if (gameOver == 0) {
+    nameField = 5;
     int xValue = analogRead(A0);
     int yValue = analogRead(A1);
     lcd.setCursor(cursorLocX, cursorLocY);
@@ -177,6 +178,7 @@ bool pressed() {
     gameSpeed = 100;    
     meteorLoc = 15;
     gameOver = 0;
+    gameAcc = 10;
     nameGivenThisRound = 0;
     cursorLocY = 0;
     cursorLocX = 3;
